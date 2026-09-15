@@ -1,0 +1,315 @@
+/* ============================================================
+   AZALEA VAULT — Full-screen split-door overlay
+   Two flat brushed-steel half-doors fill the entire viewport.
+   Click ENTER → handle spins → halves slide apart → page revealed.
+   ============================================================ */
+
+.vault-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: transparent;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, sans-serif;
+  animation: vaultFadeIn .35s ease both;
+}
+@keyframes vaultFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.vault-overlay.dismissed {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+/* ============================ DOOR HALVES ============================
+   Each half fills exactly one side of the screen. When .opening is
+   added, they slide outward and the page underneath is revealed. */
+.vault-half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 3;
+  will-change: transform;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vault-half-left {
+  left: 0;
+  background:
+    /* Specular highlight near the seam — light catching the metal */
+    radial-gradient(ellipse 80% 70% at 92% 38%, rgba(255,255,255,0.13) 0%, transparent 60%),
+    /* Vertical brushed-metal pattern */
+    repeating-linear-gradient(180deg,
+      rgba(0,0,0,0.06) 0px, transparent 1px, transparent 4px, rgba(255,255,255,0.025) 5px),
+    /* Vertical lighting (top brighter, bottom darker) */
+    linear-gradient(180deg, #b0b0b0 0%, #909090 35%, #737373 75%, #5a5a5a 100%);
+  box-shadow:
+    inset -6px 0 18px rgba(0,0,0,0.75),       /* deep shadow at the seam */
+    inset 14px 0 28px rgba(0,0,0,0.22),       /* slight darkness at far edge */
+    inset 0 -18px 36px rgba(0,0,0,0.32);      /* darker bottom */
+}
+
+.vault-half-right {
+  right: 0;
+  background:
+    radial-gradient(ellipse 80% 70% at 8% 38%, rgba(255,255,255,0.13) 0%, transparent 60%),
+    repeating-linear-gradient(180deg,
+      rgba(0,0,0,0.06) 0px, transparent 1px, transparent 4px, rgba(255,255,255,0.025) 5px),
+    linear-gradient(180deg, #b0b0b0 0%, #909090 35%, #737373 75%, #5a5a5a 100%);
+  box-shadow:
+    inset 6px 0 18px rgba(0,0,0,0.75),
+    inset -14px 0 28px rgba(0,0,0,0.22),
+    inset 0 -18px 36px rgba(0,0,0,0.32);
+}
+
+.vault-overlay.opening .vault-half-left  { transform: translateX(-100%); }
+.vault-overlay.opening .vault-half-right { transform: translateX(100%); }
+
+/* ============================ SEAM ============================ */
+.vault-seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  margin-left: -1.5px;
+  background: linear-gradient(to right,
+    rgba(0,0,0,0.4) 0%,
+    rgba(0,0,0,0.9) 50%,
+    rgba(0,0,0,0.4) 100%);
+  z-index: 4;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.vault-overlay.opening .vault-seam { opacity: 0; }
+
+/* ============================ BOLTS ============================
+   Chrome cylinder bolts placed along the outer edges of each half
+   (top edge, bottom edge, outer side). Positioned via inline styles
+   from JS. They slide off-screen with their parent half. */
+.vault-bolt {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%,
+      #f5f5f5 0%, #d8d8d8 18%, #a0a0a0 45%, #5a5a5a 80%, #2a2a2a 100%);
+  box-shadow:
+    inset 0 -1px 2px rgba(0,0,0,0.7),
+    inset 0 1px 1.5px rgba(255,255,255,0.5),
+    1px 2px 3px rgba(0,0,0,0.7),
+    0 0 0 1.5px rgba(20,20,20,0.55);
+  pointer-events: none;
+}
+
+/* ============================ HANDLE ============================
+   Three nested elements:
+   .vault-handle-pos — centers via translate (no transform conflict)
+   .vault-handle — animates rotation during unlock spin
+   .vault-handle-inner — fades + scales when doors open
+*/
+.vault-handle-pos {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(38vw, 38vh);
+  height: min(38vw, 38vh);
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+.vault-handle {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.vault-overlay.unlocking .vault-handle {
+  animation: vaultHandleSpin 0.55s cubic-bezier(0.3, 0, 0.4, 1) both;
+}
+@keyframes vaultHandleSpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(540deg); }
+}
+
+.vault-handle-inner {
+  position: absolute;
+  inset: 0;
+  transition:
+    opacity 0.2s ease 0.05s,
+    transform 0.3s cubic-bezier(0.5, 0, 0.5, 1) 0.05s;
+  will-change: opacity, transform;
+}
+.vault-overlay.opening .vault-handle-inner {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.vault-handle-hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30%;
+  height: 30%;
+  margin: -15% 0 0 -15%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 28%, #ececec 0%, #b8b8b8 28%, #6e6e6e 65%, #2a2a2a 100%);
+  box-shadow:
+    inset 0 -3px 6px rgba(0,0,0,0.6),
+    inset 0 3px 6px rgba(255,255,255,0.3),
+    0 0 12px rgba(0,0,0,0.7);
+  z-index: 3;
+}
+
+.vault-spoke {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4%;
+  height: 50%;
+  margin-left: -2%;
+  background: linear-gradient(to right,
+    #2a2a2a 0%, #707070 18%, #c8c8c8 50%, #707070 82%, #2a2a2a 100%);
+  border-radius: 2px;
+  transform-origin: 50% 0%;
+  transform: rotate(calc(var(--i) * 60deg));
+  box-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.vault-spoke::after {
+  content: '';
+  position: absolute;
+  bottom: -8%;
+  left: 50%;
+  width: 280%;
+  height: 32%;
+  margin-left: -140%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #ececec 0%, #b8b8b8 25%, #6e6e6e 65%, #2a2a2a 100%);
+  box-shadow:
+    inset 0 -1px 2px rgba(0,0,0,0.6),
+    0 1px 3px rgba(0,0,0,0.7);
+}
+
+/* ============================ FLASH ============================ */
+.vault-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center,
+    rgba(255,255,255,0.55) 0%,
+    rgba(255,255,255,0.18) 30%,
+    transparent 65%);
+  opacity: 0;
+  z-index: 6;
+}
+.vault-overlay.unlocking .vault-flash {
+  animation: vaultFlash 0.4s ease 0.5s both;
+}
+@keyframes vaultFlash {
+  0%   { opacity: 0; }
+  20%  { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* ============================ ENTER BUTTON ============================ */
+.vault-enter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: linear-gradient(135deg, #ececec 0%, #b8b8b8 50%, #7a7a7a 100%);
+  color: #1a1a1a;
+  border: 2px solid rgba(255,255,255,0.55);
+  border-radius: 999px;
+  padding: 18px 38px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 4px rgba(220,220,220,0.18),
+    0 0 30px rgba(255,255,255,0.45),
+    0 8px 24px rgba(0,0,0,0.7);
+  animation: vaultEnterPulse 1.8s ease-in-out infinite;
+  transition: transform .2s ease;
+}
+.vault-enter small {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  margin-top: 6px;
+  opacity: 0.78;
+  text-transform: none;
+}
+.vault-enter:hover  { transform: translate(-50%, -50%) scale(1.04); }
+.vault-enter:active { transform: translate(-50%, -50%) scale(0.98); }
+
+@keyframes vaultEnterPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(220,220,220,0.18), 0 0 30px rgba(255,255,255,0.4), 0 8px 24px rgba(0,0,0,0.7); }
+  50%      { box-shadow: 0 0 0 12px rgba(220,220,220,0.06), 0 0 50px rgba(255,255,255,0.6), 0 8px 24px rgba(0,0,0,0.7); }
+}
+
+.vault-overlay.unlocking .vault-enter,
+.vault-overlay.opening .vault-enter {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+/* ============================ CONTROLS ============================ */
+.vault-controls {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+.vault-ctrl-btn {
+  background: rgba(20, 20, 20, 0.6);
+  color: rgba(235, 235, 235, 0.95);
+  border: 1px solid rgba(170, 170, 170, 0.35);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background .2s ease, color .2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.vault-ctrl-btn:hover { background: rgba(20, 20, 20, 0.85); color: #fff; }
+.vault-ctrl-btn svg   { width: 15px; height: 15px; }
+.vault-overlay.opening .vault-controls {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .vault-handle-pos { width: 60vw; height: 60vw; }
+  .vault-controls { top: 16px; right: 16px; }
+  .vault-ctrl-btn { padding: 8px 14px; font-size: 12px; }
+  .vault-enter { padding: 16px 30px; font-size: 14px; }
+  .vault-bolt { width: 18px; height: 18px; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .vault-overlay,
+  .vault-overlay * {
+    animation: none !important;
+    transition: opacity 0.3s ease !important;
+  }
+}
