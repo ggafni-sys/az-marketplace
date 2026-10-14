@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="The premier marketplace for authenticated Masters and golf memorabilia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/shared.css">
+<style>
+.auth-shell { min-height: calc(100vh - 220px); display: grid; grid-template-columns: 1fr 1fr; max-width: 1200px; margin: 0 auto; }
+.auth-side { background: linear-gradient(135deg, var(--green-deep) 0%, var(--green) 100%); color: var(--gold-bright); padding: 56px 48px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; border-radius: 16px 0 0 16px; }
+.auth-side::before { content: ''; position: absolute; top: -100px; right: -100px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(212, 183, 119, 0.16) 0%, transparent 70%); }
+.auth-side::after { content: ''; position: absolute; bottom: -80px; left: -80px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle, rgba(196, 122, 110, 0.14) 0%, transparent 70%); }
+.auth-side-eye { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.85; margin-bottom: 12px; position: relative; z-index: 1; }
+.auth-side h1 { font-size: 38px; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; color: white; margin-bottom: 16px; position: relative; z-index: 1; }
+.auth-side h1 em { color: var(--gold-bright); font-style: italic; }
+.auth-side p { font-size: 15px; line-height: 1.6; opacity: 0.85; max-width: 360px; position: relative; z-index: 1; }
+.auth-feats { display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 1; }
+.auth-feat { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; }
+.auth-feat svg { width: 22px; height: 22px; color: var(--gold-bright); flex-shrink: 0; margin-top: 1px; }
+.auth-side-foot { font-size: 12px; opacity: 0.6; position: relative; z-index: 1; }
+
+.auth-form-wrap { background: white; padding: 56px 56px; display: flex; flex-direction: column; justify-content: center; border-radius: 0 16px 16px 0; box-shadow: var(--shadow-md); }
+.auth-tabs { display: flex; gap: 4px; padding: 4px; background: var(--paper); border-radius: 10px; margin-bottom: 28px; position: relative; }
+.auth-tab { flex: 1; text-align: center; padding: 10px 16px; font-size: 13.5px; font-weight: 700; color: var(--ink-muted); cursor: pointer; border-radius: 8px; transition: color .25s ease; position: relative; z-index: 1; background: none; border: none; font-family: var(--font); }
+.auth-tab.active { color: var(--green-deep); }
+.auth-tab-indicator { position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: white; border-radius: 8px; box-shadow: var(--shadow-sm); transition: transform .3s cubic-bezier(.4, 0, .2, 1); }
+.auth-tabs[data-tab="signup"] .auth-tab-indicator { transform: translateX(100%); }
+
+.auth-panel { display: none; animation: panelIn .35s ease both; }
+.auth-panel.active { display: block; }
+@keyframes panelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.auth-form-wrap h2 { font-size: 24px; font-weight: 800; color: var(--green-deep); letter-spacing: -0.02em; margin-bottom: 6px; }
+.auth-form-wrap .sub { font-size: 13.5px; color: var(--ink-muted); margin-bottom: 24px; }
+
+.password-wrap { position: relative; }
+.password-wrap .input { padding-right: 42px; }
+.password-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 8px; color: var(--ink-soft); cursor: pointer; display: flex; align-items: center; }
+.password-toggle:hover { color: var(--green-deep); }
+.password-toggle svg { width: 18px; height: 18px; }
+
+.auth-extra { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+.auth-extra a { color: var(--coral-deep); text-decoration: none; font-weight: 600; }
+.auth-extra a:hover { text-decoration: underline; }
+.remember { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-warm); cursor: pointer; }
+.remember input { accent-color: var(--green-deep); }
+
+.social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.social-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 14px; background: white; border: 1.5px solid var(--line); border-radius: 8px; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--ink-warm); cursor: pointer; transition: background .15s ease, border-color .15s ease; text-decoration: none; }
+.social-btn:hover { background: var(--paper); border-color: var(--gold); }
+.social-btn svg { width: 16px; height: 16px; }
+
+.password-strength { height: 4px; background: var(--line-soft); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.password-strength-bar { height: 100%; width: 0; background: var(--coral-deep); transition: width .3s ease, background .3s ease; border-radius: 2px; }
+.strength-label { font-size: 11.5px; color: var(--ink-muted); margin-top: 4px; font-weight: 500; }
+
+@media (max-width: 900px) {
+  .auth-shell { grid-template-columns: 1fr; }
+  .auth-side { border-radius: 16px 16px 0 0; padding: 36px 28px; }
+  .auth-form-wrap { border-radius: 0 0 16px 16px; padding: 36px 28px; }
+}
+</style>
+<script>window.AZ_HOME="/";window.AZ_ASSETS="/assets";</script>
+<title>Sign in | Azalea Marketplace</title>
+</head>
+<body class="azalea-static">
+<div class="topbar">
+  <div class="topbar-inner">
+    <div><span class="topbar-pill"><span class="dot"></span> Verified Marketplace</span> &nbsp;Augusta, Georgia</div>
+    <div class="topbar-right">
+      <a href="/sell/">Sell on Azalea</a>
+      <span class="sep">|</span>
+      <a href="#">Help &amp; Contact</a>
+      <span class="sep">|</span>
+      <a href="#">Track Order</a>
+      <span class="sep">|</span>
+      <a href="/login/">Sign In</a>
+    </div>
+  </div>
+</div>
+<header class="header">
+  <div class="header-inner">
+    <a href="/" class="brand">
+      <img src="/assets/azalea-logo.jpg" alt="Azalea Marketplace — Golf · Memorabilia · Home · Gifts" class="brand-logo">
+    </a>
+    <div class="search">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search Masters memorabilia, gnomes, hats…" id="searchInput">
+      </div>
+      <select class="search-cat">
+        <option>All Categories</option>
+        <option>Pins &amp; Ball Markers</option>
+        <option>Gnomes</option>
+        <option>Apparel</option>
+        <option>Tournament Goods</option>
+        <option>Vintage</option>
+      </select>
+      <button class="search-btn" onclick="window.location.href='/'">Search</button>
+    </div>
+    <div class="header-actions">
+      <a href="/dashboard/#saved" class="h-action">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span class="h-action-label">Saved</span>
+        <span class="h-action-badge" data-saved-count>0</span>
+      </a>
+      <a href="/login/" class="h-action">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="h-action-label">Account</span>
+      </a>
+      <a href="/cart/" class="h-action">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="h-action-label">Cart</span>
+        <span class="h-action-badge" data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</header>
+<main class="page-narrow">
+  <div class="auth-shell reveal">
+    <div class="auth-side">
+      <div>
+        <div class="auth-side-eye">Welcome to Azalea</div>
+        <h1>Sign in to your <em>collection.</em></h1>
+        <p>Track your bids, manage listings, save badges to your watchlist, and check on every authenticated piece coming your way.</p>
+      </div>
+
+      <div class="auth-feats">
+        <div class="auth-feat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Buyer protection &amp; in-house authentication on every order</span>
+        </div>
+        <div class="auth-feat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Concierge sourcing for vintage Masters badges &amp; rare pieces</span>
+        </div>
+        <div class="auth-feat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Early access to drops 24 hours before public release</span>
+        </div>
+      </div>
+
+      <div class="auth-side-foot">© 2026 Azalea Marketplace · Augusta, Georgia</div>
+    </div>
+
+    <div class="auth-form-wrap">
+      <div class="auth-tabs" id="authTabs" data-tab="signin">
+        <div class="auth-tab-indicator"></div>
+        <button class="auth-tab active" data-target="signin">Sign In</button>
+        <button class="auth-tab" data-target="signup">Sign Up</button>
+      </div>
+
+      <!-- SIGN IN PANEL -->
+      <div class="auth-panel active" data-panel="signin">
+        <h2>Welcome back.</h2>
+        <p class="sub">Pick up where you left off — your watchlist, orders, and listings are waiting.</p>
+
+        <form id="signinForm" novalidate>
+          <div class="field">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" class="input" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label>Password <span class="req">*</span></label>
+            <div class="password-wrap">
+              <input type="password" class="input" id="signinPw" placeholder="••••••••" required>
+              <button type="button" class="password-toggle" data-target="signinPw" tabindex="-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="auth-extra">
+            <label class="remember"><input type="checkbox" checked> Remember me for 30 days</label>
+            <a href="#">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            Sign In
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+
+          <div class="divider">or continue with</div>
+
+          <div class="social-row">
+            <a class="social-btn" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Google</a>
+            <a class="social-btn" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.86-3.08.43-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.43C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg> Apple</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- SIGN UP PANEL -->
+      <div class="auth-panel" data-panel="signup">
+        <h2>Create your account.</h2>
+        <p class="sub">Free to join. Start collecting, listing, and watching authenticated memorabilia in minutes.</p>
+
+        <form id="signupForm" novalidate>
+          <div class="field-row">
+            <div class="field">
+              <label>First name <span class="req">*</span></label>
+              <input type="text" class="input" placeholder="Jane" required>
+            </div>
+            <div class="field">
+              <label>Last name <span class="req">*</span></label>
+              <input type="text" class="input" placeholder="Caddy" required>
+            </div>
+          </div>
+          <div class="field">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" class="input" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label>Password <span class="req">*</span></label>
+            <div class="password-wrap">
+              <input type="password" class="input" id="signupPw" placeholder="At least 8 characters" required>
+              <button type="button" class="password-toggle" data-target="signupPw" tabindex="-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="password-strength"><div class="password-strength-bar" id="strBar"></div></div>
+            <div class="strength-label" id="strLabel">Use 8+ characters with letters, numbers &amp; symbols</div>
+          </div>
+
+          <label class="remember" style="margin: 6px 0 16px;">
+            <input type="checkbox" required> I agree to the <a href="#" style="color: var(--coral-deep); margin: 0 4px;">Terms</a> and <a href="#" style="color: var(--coral-deep); margin-left: 4px;">Privacy Policy</a>
+          </label>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            Create Account
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+
+          <div class="divider">or sign up with</div>
+
+          <div class="social-row">
+            <a class="social-btn" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Google</a>
+            <a class="social-btn" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.86-3.08.43-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.43C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg> Apple</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main><footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand-block">
+      <div class="footer-brand-row">
+        <img src="/assets/azalea-logo.jpg" alt="Azalea Marketplace" class="footer-brand-logo">
+      </div>
+      <div class="footer-tag">The premier marketplace for authenticated Masters and golf memorabilia — gnomes, apparel, tournament goods, display pieces, and rare collectibles.</div>
+    </div>
+    <div class="footer-col">
+      <h4>Marketplace</h4>
+      <ul>
+        <li><a href="/">All Items</a></li>
+        <li><a href="/#shop">Pins &amp; Ball Markers</a></li>
+        <li><a href="/#shop">Gnomes</a></li>
+        <li><a href="/#shop">Apparel</a></li>
+        <li><a href="/#shop">Hot Deals</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Sell</h4>
+      <ul>
+        <li><a href="/sell/">List an Item</a></li>
+        <li><a href="/dashboard/">Seller Hub</a></li>
+        <li><a href="#">Authentication</a></li>
+        <li><a href="#">Pricing &amp; Fees</a></li>
+        <li><a href="#">Seller Stories</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Buy</h4>
+      <ul>
+        <li><a href="/cart/">Cart</a></li>
+        <li><a href="#">Buyer Protection</a></li>
+        <li><a href="#">Shipping &amp; Returns</a></li>
+        <li><a href="#">Track Order</a></li>
+        <li><a href="/dashboard/#saved">Wishlist</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Concierge Support</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bot">
+    <div>© 2026 Azalea Marketplace · All Rights Reserved · Augusta, Georgia</div>
+    <div class="footer-payments">
+      <span class="footer-payment">VISA</span>
+      <span class="footer-payment">MC</span>
+      <span class="footer-payment">AMEX</span>
+      <span class="footer-payment">SHOP PAY</span>
+      <span class="footer-payment">APPLE PAY</span>
+    </div>
+  </div>
+</footer>
+<script src="/assets/shared.js"></script>
+<script>
+(function() {
+  const tabs = document.getElementById('authTabs');
+  const panels = document.querySelectorAll('.auth-panel');
+  tabs.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.onclick = () => {
+      const target = tab.dataset.target;
+      tabs.dataset.tab = target;
+      tabs.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t === tab));
+      panels.forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+    };
+  });
+
+  // Allow ?tab=signup deep link
+  const url = new URL(window.location.href);
+  if (url.searchParams.get('tab') === 'signup') {
+    tabs.querySelector('[data-target="signup"]').click();
+  }
+
+  document.querySelectorAll('.password-toggle').forEach(btn => {
+    btn.onclick = () => {
+      const t = document.getElementById(btn.dataset.target);
+      t.type = t.type === 'password' ? 'text' : 'password';
+    };
+  });
+
+  // Password strength meter
+  const pw = document.getElementById('signupPw');
+  const bar = document.getElementById('strBar');
+  const lbl = document.getElementById('strLabel');
+  if (pw) {
+    pw.addEventListener('input', () => {
+      const v = pw.value;
+      let score = 0;
+      if (v.length >= 8) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const colors = ['var(--coral-deep)', 'var(--coral-deep)', 'var(--warn)', 'var(--gold)', 'var(--success)'];
+      const labels = ['Use 8+ characters with letters, numbers & symbols', 'Weak', 'Fair', 'Good', 'Strong'];
+      bar.style.width = (score * 25) + '%';
+      bar.style.background = colors[score];
+      lbl.textContent = labels[score];
+    });
+  }
+
+  // Form submits go to dashboard (demo)
+  document.getElementById('signinForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    Azalea.toast('Signed in successfully', 'success');
+    setTimeout(() => window.location.href = '/dashboard/', 700);
+  });
+  document.getElementById('signupForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    Azalea.toast('Account created — welcome!', 'success');
+    setTimeout(() => window.location.href = '/dashboard/', 700);
+  });
+})();
+</script>
+</body>
+</html>
